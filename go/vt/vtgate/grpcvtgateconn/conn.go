@@ -18,8 +18,6 @@ limitations under the License.
 package grpcvtgateconn
 
 import (
-	"flag"
-
 	"google.golang.org/grpc"
 
 	"golang.org/x/net/context"
@@ -34,13 +32,6 @@ import (
 	topodatapb "vitess.io/vitess/go/vt/proto/topodata"
 	vtgatepb "vitess.io/vitess/go/vt/proto/vtgate"
 	vtgateservicepb "vitess.io/vitess/go/vt/proto/vtgateservice"
-)
-
-var (
-	cert = flag.String("vtgate_grpc_cert", "", "the cert to use to connect")
-	key  = flag.String("vtgate_grpc_key", "", "the key to use to connect")
-	ca   = flag.String("vtgate_grpc_ca", "", "the server ca to use to validate servers when connecting")
-	name = flag.String("vtgate_grpc_server_name", "", "the server name to use to validate server certificate")
 )
 
 func init() {
@@ -59,13 +50,6 @@ func dial(ctx context.Context, addr string) (vtgateconn.Impl, error) {
 // DialWithOpts allows for custom dial options to be set on a vtgateConn.
 func DialWithOpts(ctx context.Context, opts ...grpc.DialOption) vtgateconn.DialerFunc {
 	return func(ctx context.Context, address string) (vtgateconn.Impl, error) {
-		opt, err := grpcclient.SecureDialOption(*cert, *key, *ca, *name)
-		if err != nil {
-			return nil, err
-		}
-
-		opts = append(opts, opt)
-
 		cc, err := grpcclient.Dial(address, grpcclient.FailFast(false), opts...)
 		if err != nil {
 			return nil, err
